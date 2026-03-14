@@ -12,10 +12,21 @@
         android:textSize="17sp"/>
 
     <Button
+        android:id="@+id/btn_single"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="单独的点击监听器"
         android:textColor="@color/black"
         android:textSize="17sp"/>
+
+    <TextView
+        android:id="@+id/tv_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:gravity="center"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:text="按钮点击结果"/>
 
 </LinearLayout>

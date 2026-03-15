@@ -29,4 +29,13 @@
         android:textSize="15sp"
         android:text="按钮点击结果"/>
 
+    <Button
+        android:id="@+id/btn_long"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="单独的长按监听器"
+        android:textColor="@color/black"
+        android:enabled="false"
+        android:textSize="17sp"/>
+
 </LinearLayout>

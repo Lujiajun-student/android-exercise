@@ -1,6 +1,5 @@
 package com.example.chapter04;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -21,12 +20,15 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
     // 显示的文本
     private String showText = "";
 
+    TextView tv_result;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calculator);
         // 获取展示计算结果的视图
-        TextView tv_result = findViewById(R.id.tv_result);
+        tv_result = findViewById(R.id.tv_result);
+
         // 给每一个按钮控件注册点击监听器
         findViewById(R.id.btn_cancel).setOnClickListener(this);
         findViewById(R.id.btn_divide).setOnClickListener(this);
@@ -64,17 +66,19 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
         }
         int id = v.getId();
         if (id == R.id.btn_clear) {
-
+            clear();
         }else if (id == R.id.btn_cancel) {
 
         }else if (id == R.id.btn_plus) {
-
+            operator = inputText;
+            refreshText(showText + operator);
         }else if (id == R.id.btn_minus) {
 
         }else if (id == R.id.btn_multiply) {
 
         }else if (id == R.id.btn_divide) {
-
+            operator = inputText;
+            refreshText(showText + operator);
         }else if (id == R.id.btn_equal) {
 
         }else if (id == R.id.btn_sqrt) {
@@ -82,11 +86,43 @@ public class CalculatorActivity extends AppCompatActivity implements View.OnClic
         }else if (id == R.id.btn_reciprocal) {
 
         }else {
-            // 输入操作数时，需要检测运算符是否已经输入，未输入代表当前操作数为第一个操作数
-            if (operator.equals("")) {
-
+            // 输入操作数时，需要检测运算符是否已经输入，未输入代表当前操作数为第一个操作数，例如89后再点击1就是891
+            if (operator.isEmpty()) {
+                firstNum += inputText;
+            }else {
+                // 有运算符，拼接第二个操作数，例如89+后再点击1就是89+1
+                secondNum += inputText;
             }
-        }
+            // 刷新显示文本
+            if (showText.equals("0") && !inputText.equals(".")){
+                // 如果当前显示是0且输入的不是小数点，则替换显示
+                refreshText(inputText);
+            } else if (showText.isEmpty()) {
+                // 如果显示为空，直接显示输入内容
+                refreshText(inputText);
+            } else {
+                // 否则拼接显示
+                refreshText(showText + inputText);
+            }
 
+        }
+    }
+    // 刷新文本显示
+    private void refreshText(String text) {
+        showText = text;
+        tv_result.setText(showText);
+    }
+
+    // 刷新运算符
+    private void refreshOperate(String new_result) {
+        String result = new_result;
+        firstNum = result;
+        secondNum = "";
+        operator = "";
+    }
+
+    // 清空
+    private void clear() {
+        refreshText("");
     }
 }

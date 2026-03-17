@@ -1317,3 +1317,16 @@ public class CalculatorActivity extends AppCompatActivity {
 
 ### 2.2.3 逻辑处理
 
+**这里存在很多不合理的地方，暂时丢弃。**
+
+## 2.3 Activity
+
+Activity是屏幕组件，也就是活动。打开App时看到的每一个界面，都是一个Activity。
+
+Activity本身不绘制组件元素，而是作为容器加载XML布局文件来展示页面信息。一个典型的应用应该包含多个Activity，如登录、主页、详情页、设置页等。
+
+**任何Activity都需要在`AndroidManifest.xml`中声明。如果不声明，系统会无法识别并抛出异常。**
+
+![image-20260317190808709](README_Picture/image-20260317190808709.png)
+
+### 2.3.1 启动和停止

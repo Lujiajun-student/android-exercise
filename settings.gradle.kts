@@ -26,3 +26,4 @@ rootProject.name = "My Application"
 include(":app")
 include(":app:chapter03")
 include(":app:chapter04")
+include(":app:chapter05")

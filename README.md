@@ -1330,3 +1330,333 @@ Activity本身不绘制组件元素，而是作为容器加载XML布局文件来
 ![image-20260317190808709](README_Picture/image-20260317190808709.png)
 
 ### 2.3.1 启动和停止
+
+启动Activity也就是跳转到新页面。
+
+```java
+startActivity(new Intent(原页面.this, 目标页面.class));
+```
+
+从当前页面回到上一个页面，相当于关闭当前页面。
+
+```java
+finish(); // 结束当前的活动页面
+```
+
+现在创建两个Activity，分别是ActFinishActivity和ActStartActivity。
+
+```java
+package com.example.chapter05;
+
+import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ActFinishActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_act_finish);
+
+    }
+}
+```
+
+```go
+package com.example.chapter05;
+
+import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ActStartActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_act_start);
+
+    }
+}
+```
+
+接下来，在`activity_act_start.xml`中添加按钮，能够跳转到新页面。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ActStartActivity"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <Button
+        android:id="@+id/btn_act_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="跳转到下一个页面"/>
+
+</LinearLayout>
+```
+
+在`ActStartActivity`中也定义按钮的功能。
+
+```java
+package com.example.chapter05;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ActStartActivity extends AppCompatActivity implements View.OnClickListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_act_start);
+        // 点击跳转
+        findViewById(R.id.btn_act_next).setOnClickListener(this);
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        // 开始新的界面
+        startActivity(new Intent(this, ActFinishActivity.class));
+    }
+}
+```
+
+接下来，需要实现`activity_act_finish.xml`。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ActFinishActivity"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/iv_back"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:padding="5dp"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/ic_black"/>
+
+    <Button
+        android:id="@+id/btn_finish"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="完成"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="按返回键返回"/>
+
+</LinearLayout>
+```
+
+然后在`ActFinishActivity`中实现按钮点击返回的功能。
+
+```java
+package com.example.chapter05;
+
+import android.os.Bundle;
+import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ActFinishActivity extends AppCompatActivity implements View.OnClickListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_act_finish);
+        findViewById(R.id.btn_finish).setOnClickListener(this);
+        findViewById(R.id.iv_back).setOnClickListener(this);
+
+    }
+    @Override
+    public void onClick(View v) {
+        // 点击这两个按钮，实现关闭页面
+        if (v.getId() == R.id.iv_back || v.getId() == R.id.btn_finish) {
+            finish();
+        }
+    }
+}
+```
+
+这样，就可以实现点击图片和点击按钮返回到上一页。
+
+![image-20260317205200612](README_Picture/image-20260317205200612.png)
+
+### 2.3.2 生命周期
+
+![image-20260317205406751](README_Picture/image-20260317205406751.png)
+
+Activity的生命周期存在多个阶段。
+
+```java
+package com.example.chapter05;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ActStartActivity extends AppCompatActivity implements View.OnClickListener {
+    
+    private static final String TAG = "ning";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "ActStartActivity onCreate");
+        setContentView(R.layout.activity_act_start);
+        // 点击跳转
+        findViewById(R.id.btn_act_next).setOnClickListener(this);
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        // 开始新的界面
+        startActivity(new Intent(this, ActFinishActivity.class));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "ActStartActivity onStart");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "ActStartActivity onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "ActStartActivity onPause");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "ActStartActivity onDestroy");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG, "ActStartActivity onRestart");
+    }
+}
+```
+
+通过这里，就能清晰地了解到生命周期位于什么时期。
+
+![image-20260317212134867](README_Picture/image-20260317212134867.png)
+
+初次打开时，会执行onCreate。然后进入页面，会有onStart和onResume。onResume用于保持当前页面在线。
+
+如果离开页面，会执行onPause，回到页面执行onRestart。
+
+### 2.3.3 启动模式
+
+Android对于多个Activity启动，有很多种处理方式。最经典的就是使用任务栈，将第一个Activity入栈，接着开启的其他Activity就依次入栈，关闭Activity时也是依次出栈。
+
+Android有四种启动模式。
+
+#### 2.3.3.1 Standard 标准模式
+
+每次启动Activity，系统都会创建Activity实例并压入任务栈中，按顺序入栈和出栈。这是默认的启动方式。
+
+设置方法在`AndroidManifest.xml`中。
+
+```xml
+<activity
+    android:name=".ActStartActivity"
+    android:exported="true"
+    android:launchMode="standard">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity>
+```
+
+#### 2.3.3.2 singleTop 栈顶复用模式
+
+如果如果栈顶的Activity就是接下来要新建的Activity，就不会重复创建新的Activity入栈，而是直接复用。
+
+```xml
+<activity
+    android:name=".ActStartActivity"
+    android:exported="true"
+    android:launchMode="singleTop">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity>
+```
+
+这种适用于微信应用打开微信支付、打开微信小程序等，就可以使用栈顶复用，避免新建多个Activity入栈。
+
+#### 2.3.3.3 SingleTask栈内复用
+
+如果新建的Activity存在于栈中，那么就会将该栈帧上的所有栈元素全部出栈，然后将非目标栈帧全部入栈，让当前的栈元素位于栈顶。
+
+```xml
+<activity
+    android:name=".ActStartActivity"
+    android:exported="true"
+    android:launchMode="singleTask">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity>
+```
+
+#### 2.3.3.4 SingleInstance单实例模式
+
+Activity独占一个栈，这个栈只能有一个实例。后续任何请求都会复用这一个实例。
+
+```xml
+<activity
+    android:name=".ActStartActivity"
+    android:exported="true"
+    android:launchMode="singleInstance">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity>
+```
+

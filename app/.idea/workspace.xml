@@ -5,7 +5,63 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="70a267e5-1c1e-41c4-a6dc-b4401f6877c0" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/java/com/example/chapter05/ActReceiveActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/java/com/example/chapter05/ActRequestActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/java/com/example/chapter05/ActResponseActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/java/com/example/chapter05/ActSendActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/java/com/example/chapter05/ActionUriActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/java/com/example/chapter05/JumpFirstActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/java/com/example/chapter05/JumpSecondActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/java/com/example/chapter05/LoginInputActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/java/com/example/chapter05/LoginSuccessActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/java/com/example/chapter05/MetaDataActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/java/com/example/chapter05/ReadStringActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/res/layout/activity_act_receive.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/res/layout/activity_act_request.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/res/layout/activity_act_response.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/res/layout/activity_act_send.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/res/layout/activity_action_uri.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/res/layout/activity_jump_first.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/res/layout/activity_jump_second.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/res/layout/activity_login_input.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/res/layout/activity_login_success.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/res/layout/activity_meta_data.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter05/src/main/res/layout/activity_read_string.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/proguard-rules.pro" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/androidTest/java/com/example/chapter06/ExampleInstrumentedTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/AndroidManifest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/java/com/example/chapter06/MainActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/drawable/ic_launcher_background.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/drawable/ic_launcher_foreground.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-anydpi/ic_launcher.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-anydpi/ic_launcher_round.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-hdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-hdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-mdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-mdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-xhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-xxhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/values-night/themes.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/values/colors.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/values/strings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/main/res/values/themes.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/chapter06/src/test/java/com/example/chapter06/ExampleUnitTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/deploymentTargetSelector.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/deploymentTargetSelector.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chapter05/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/chapter05/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chapter05/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/chapter05/src/main/res/values/strings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/../settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,9 +74,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 5
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="3B4ScL420YFJ1208h7jfRDF9eAc" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -37,11 +93,13 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/Aphrodite/Desktop/Study/Kingsoft/Android/android-exercise/app",
-    "project.structure.last.edited": "Dependencies",
+    "project.structure.last.edited": "Suggestions",
     "project.structure.proportion": "0.17",
-    "project.structure.side.proportion": "0.2"
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "reference.settings.ide.settings.file-colors"
   }
 }]]></component>
   <component name="PsdUISettings">

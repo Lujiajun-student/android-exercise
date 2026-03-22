@@ -1628,7 +1628,7 @@ Android有四种启动模式。
 
 #### 2.3.3.3 SingleTask栈内复用
 
-如果新建的Activity存在于栈中，那么就会将该栈帧上的所有栈元素全部出栈，然后将非目标栈帧全部入栈，让当前的栈元素位于栈顶。
+如果新建的Activity存在于栈中，那么就会将该栈帧上的所有栈元素全部出栈，仅留下当前栈以及栈帧下的栈。
 
 ```xml
 <activity
@@ -1660,3 +1660,1133 @@ Activity独占一个栈，这个栈只能有一个实例。后续任何请求都
 </activity>
 ```
 
+#### 2.3.3.5 示例
+
+接下来创建两个页面，分别对应JumpFirstActivity和JumpSecondActivity。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".JumpFirstActivity"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btn_jump_second"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="跳到第二个页面"/>
+</LinearLayout>
+```
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".JumpSecondActivity"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btn_jump_first"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="跳到第一个页面" />
+</LinearLayout>
+```
+
+```java
+package com.example.chapter05;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class JumpFirstActivity extends AppCompatActivity implements View.OnClickListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_jump_first);
+        findViewById(R.id.btn_jump_second).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        // 点击跳转
+        Intent intent = new Intent(this, JumpSecondActivity.class);
+        // 战中存在待跳转的活动实例时，重新创建该活动的实例，同时清除原实例上的所有实例
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+}
+```
+
+```java
+package com.example.chapter05;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class JumpSecondActivity extends AppCompatActivity implements View.OnClickListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_jump_second);
+        findViewById(R.id.btn_jump_first).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        // 点击跳转
+        Intent intent = new Intent(this, JumpFirstActivity.class);
+        // 栈中存在待跳转的活动实例时，重新创建该活动的实例，同时清除原实例上的所有实例
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+}
+```
+
+然后在`AndroidManifest.xml`中将这个JumpFirstActivity作为主页面。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MyApplication">
+        <activity
+            android:name=".JumpSecondActivity"
+            android:exported="false" />
+        <activity
+            android:name=".JumpFirstActivity"
+            android:exported="true"
+            android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+```
+
+这里就实现了从A跳到B、然后从B又跳到A的行为。但如果点击返回键，就能发现从B返回到A，再返回就回到了桌面，说明此时任务栈中只有两个栈。这里的`Intent.FLAG_ACTIVITY_CLEAR_TOP`保证了栈中不存在两个相同的实例，一旦在栈中发现即将新建的实例，就会将这个栈中以上的实例全部弹出销毁，不新建实例，让旧实例成为栈顶。
+
+如果不设置的话，多次从A跳到B再跳到A，按返回键时就会从A返回到B、从B返回到A一直重复。
+
+但如果任务是登录验证页面，弹出验证成功后就不需要回到验证页面，那么就要采用清空任务栈并新建任务栈的模式。
+
+```java
+package com.example.chapter05;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class LoginInputActivity extends AppCompatActivity implements View.OnClickListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login_input);
+        findViewById(R.id.btn_jump_success).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        Intent intent = new Intent(this, LoginSuccessActivity.class);
+        // 清空原有的任务栈，在新的任务栈中创建实例
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+}
+```
+
+只要当前的启动模式为standard，那么这里跳转到新的页面，再点击返回时，就会退回到桌面，因为旧的任务栈被清除，新的任务栈只有新跳转的页面。
+
+### 2.3.4 Intent
+
+上面实现了Activity的跳转，接下来需要实现Activity的消息传递。
+
+Intent是各个Activity之间信息沟通的桥梁，主要有三个作用。
+
+1. 表示跳转，从当前的Activity跳转到哪里去。通过`new Intent()`来指定。
+2. 发送数据到接收方。通过`intent.setData()`来传输数据。
+3. 发送方如果要得到接收方的处理结果，intent就要负责让接收方传回数据。
+
+#### 2.3.4.1 显式意图
+
+显式Intent直接指定来源活动和目标活动，能够确保从当前活动跳转到目的目的活动。
+
+```java
+// 指定从当前活动this跳转到目标活动LoginSuccessActivity
+Intent intent = new Intent(this, LoginSuccessActivity.class);
+```
+
+或者使用Component来指定。
+
+```java
+Intent intent = new Intent();
+ComponentName component = new ComponentName(this, LoginSuccessActivity.class);
+intent.setComponent(component)
+```
+
+在这里能够看到，`new Intent()`里直接传入源活动和目标活动其实是一个语法糖。
+
+#### 2.3.4.2 隐式意图
+
+隐式Intent不希望向外部透露活动名称，就给出事先定义好的标记字符串，根据这个字符串能够获取匹配到的活动。
+
+其中，MAIN表示主入口，VIEW表示显示数据，SEND表示分享内容，CALL表示直接拨号，DIAL表示准备拨号，SENDTO表示发送短信，ANSWER表示接听电话。
+
+这里先创建`activity_action_uri.xml`来实现隐式意图的页面。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ActionUriActivity"
+    android:orientation="vertical">
+    
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="点击下面按钮发送请求"/>
+    
+    <Button
+        android:id="@+id/btn_dial"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="跳到拨号页面"/>
+
+    <Button
+        android:id="@+id/btn_sms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="跳到短信页面"/>
+
+    <Button
+        android:id="@+id/btn_my"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="跳到我的页面"/>
+
+</LinearLayout>
+```
+
+接下来在ActionUriActivity中能够定义隐式Intent。
+
+```java
+package com.example.chapter05;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.view.View;
+
+public class ActionUriActivity extends AppCompatActivity implements View.OnClickListener {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_action_uri);
+        findViewById(R.id.btn_dial).setOnClickListener(this);
+        findViewById(R.id.btn_sms).setOnClickListener(this);
+        findViewById(R.id.btn_my).setOnClickListener(this);
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.btn_dial) {
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_DIAL);
+            Uri uri = Uri.parse("tel: " + "10086");
+            intent.setData(uri);
+            startActivity(intent);
+        }
+    }
+}
+```
+
+其中，`Intent.ACTION_DIAL`属于常量，会寻找对应的`intent.action.DIAL`的Activity进行跳转。而`DIAL`页面是系统自带的，因此会自动调出系统的拨号盘。
+
+![image-20260318144713150](README_Picture/image-20260318144713150.png)
+
+而如果自定义了一个Activity，在AndroidManifest指定了filter的action name为`android.intent.action.DIAL`，就会存在两个匹配的Activity供调用，手机上就会弹出选择框，能够选择两个其中一个来打开。这就是手机打开网址时，能够手动选择使用什么浏览器打开的场景。
+
+同样的，发送短信也是一样的做法，Action使用`Intent.ACTION_SENDTO`即可匹配本机的短信。
+
+```java
+@Override
+public void onClick(View v) {
+    if (v.getId() == R.id.btn_dial) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_DIAL);
+        Uri uri = Uri.parse("tel: " + "10086");
+        intent.setData(uri);
+        startActivity(intent);
+    }else if (v.getId() == R.id.btn_sms) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SENDTO);
+        Uri uri = Uri.parse("smsto: " + "10086");
+        intent.setData(uri);
+        startActivity(intent);
+    }
+}
+```
+
+
+
+![image-20260318145242459](README_Picture/image-20260318145242459.png)
+
+而如果想要跳转到自己的应用，就需要定义好xml页面和Activity后，在AndroidManifest中通过filter指定它的Action name。
+
+```xml
+<activity android:name=".LoginInputActivity"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.MY" />
+        <category android:name="android.intent.category.DEFAULT" />
+    </intent-filter>
+</activity>
+```
+
+其中，exported为true表示可以被其他应用启动。这里设置了action和category，给定了目标词MY，让隐式Intent能够根据这个目标词来进行匹配。
+
+接着修改ActionUriActivity，添加这个功能。
+
+```java
+@Override
+public void onClick(View v) {
+    if (v.getId() == R.id.btn_dial) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_DIAL);
+        Uri uri = Uri.parse("tel: " + "10086");
+        intent.setData(uri);
+        startActivity(intent);
+    }else if (v.getId() == R.id.btn_sms) {
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SENDTO);
+        Uri uri = Uri.parse("smsto: " + "10086");
+        intent.setData(uri);
+        startActivity(intent);
+    }else if (v.getId() == R.id.btn_my) {
+        Intent intent = new Intent();
+        intent.setAction("android.intent.action.MY");
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        startActivity(intent);
+    }
+}
+```
+
+这样，点击按钮后，就能通过隐式Intent，根据MY来进行匹配，跳转到匹配的页面。
+
+这里存在一个问题：定义的Action和Category有什么区别？
+
+Action描述的是这个动作。如VIEW表示查看网页，CALL表示拨打电话，这种操作是通过动作来命名的。
+
+Category表示能够执行这个动作的组件的上下文。如果跳转的是新的桌面应用，就可以指定Category为LAUNCHER，这样只会找Category对应为LAUNCHER的Activity，或者设置页面PERFERENCE等。其中，一个Activity可以指定多个Category，如同浏览器可用于查看页面、打开设置或者打开其他应用，那么这个浏览器的Category可以添加DEFAULT、PREFERENCE或者LAUNCHER。
+
+此外，自定义Category如果仅添加分类`"android.intent.category.MY_PAGE"`，系统会识别不了，需要额外添加上DEFAULT，系统才能识别。
+
+```xml
+<intent-filter>
+    <action android:name="android.intent.action.MY" />
+    <category android:name="android.intent.category.MY_PAGE" />
+    <category android:name="android.intent.category.DEFAULT" />
+</intent-filter>
+```
+
+### 2.3.5 传递数据
+
+如果使用Intent跳转时需要传递数据，最好的方法是使用Bundle对象来存放数据。
+
+这里的存取数据采用的依旧是get和set方法。例如存取int使用`getInt`和`setInt`，存取字符串数组使用`getStringArray`和`setStringArray`。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ActSendActivity"
+    android:orientation="vertical">
+    
+    <TextView
+        android:id="@+id/tv_send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="天气真好"/>
+    
+    <Button
+        android:id="@+id/btn_send"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="发送以上文字"/>
+</LinearLayout>
+```
+
+上面是`activity_act_send`页面，接下来需要实现发送`天气真好`的文字到新的页面，然后在ActSendActivity中添加按钮功能，使用Bundle来传输数据。
+
+```java
+package com.example.chapter05;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ActSendActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private TextView tv_send;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_act_send);
+       tv_send = findViewById(R.id.tv_send);
+       findViewById(R.id.btn_send).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        Intent intent  = new Intent(this, ActReceiveActivity.class);
+        // 创建bundle用于传输数据
+        Bundle bundle = new Bundle();
+        // 首先传入当前时间
+        bundle.putString("request_time", System.currentTimeMillis() + "");
+        bundle.putString("request_content", tv_send.getText().toString());
+        // 将bundle对象传入intent
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
+}
+```
+
+接着在`activity_act_receive.xml`中添加文本视图。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ActSendActivity"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_receive"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
+```
+
+这里将文本空出来，使用send传过来的文本。
+
+然后在`ActReceiveActivity`中获取bundle并设置文本。
+
+```java
+package com.example.chapter05;
+
+import android.os.Bundle;
+import android.widget.TextView;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class ActReceiveActivity extends AppCompatActivity {
+
+    private TextView tv_receive;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_act_receive);
+        tv_receive = findViewById(R.id.tv_receive);
+        // 获取bundle
+        Bundle bundle = getIntent().getExtras();
+        String requestTime = bundle.getString("request_time");
+        String requestContent = bundle.getString("request_content");
+        String desc = String.format("收到请求消息：\n请求时间为%s\n请求内容为%s\n", requestTime, requestContent);
+        tv_receive.setText(desc);
+    }
+```
+
+这样，就通过bundle实现了数据传递。
+
+![image-20260318171724811](README_Picture/image-20260318171724811.png)
+
+### 2.3.6 返回数据
+
+从A页面进入B页面，然后点击返回时，B页面可能会携带信息需要返回给A。
+
+这样，B页面打包好数据后，需要调用startActivityForResult来执行跳转。
+
+示例在ActRequestActivity和ActResponseActivity实现。
+
+```java
+package com.example.chapter05;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ActRequestActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private static final String mRequest = "";
+
+    private ActivityResultLauncher<Intent> register;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_act_request);
+        TextView tv_request = findViewById(R.id.tv_request);
+        tv_request.setText("待发送的消息为" + mRequest);
+
+        findViewById(R.id.btn_request).setOnClickListener(this);
+        // 通过registerForActivityResult注册对Activity结果的监听，其中Contracts表示是启动另一个Activity并期待返回结果，
+        // Callback表示回调接口，目标Activity关闭后，会触发这里的onActivityResult方法
+        register = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result != null) {
+                    Intent intent = result.getData();
+                    if (intent != null && result.getResultCode() == Activity.RESULT_OK) {
+                        Bundle bundle = intent.getExtras();
+                        String response_time = bundle.getString("response_time");
+                        String response_content = bundle.getString("response_content");
+                        TextView tv_response = findViewById(R.id.tv_response);
+                        tv_response.setText("收到回复：" + response_time + "，回复内容为" + response_content);
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onClick(View v) {
+        // 点击跳转
+        Intent intent = new Intent(this, ActResponseActivity.class);
+        // 创建bundle
+        Bundle bundle = new Bundle();
+        // 获取当前时间
+        bundle.putString("request_time", System.currentTimeMillis() + "");
+        bundle.putString("request_content", mRequest);
+        intent.putExtras(bundle);
+        // 有了注册器，就能通过launch方法启动目标Activity
+        register.launch(intent);
+
+    }
+}
+```
+
+这里构建了注册器register，这个注册器能够获取传入的activity，并且在目标activity关闭后，自动调用回调函数onActivityResult，这里能够对目标页面带来的数据进行处理，实现数据的返回。数据返回通过`result.getData()`获取返回页面的意图，并通过`intent.getExtras()`来获取意图中的bundle，在这里的bundle就能获取到返回页面保存的数据并进行处理。
+
+```java
+package com.example.chapter05;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ActResponseActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private final String mResponse = "OK";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_act_response);
+        TextView tv_request = findViewById(R.id.tv_request);
+        // 获取上一个页面传入的意图
+        Bundle bundle = getIntent().getExtras();
+        String request_time = bundle.getString("request_time");
+        String request_content = bundle.getString("request_content");
+        String desc = String.format("收到请求信息：\n请求时间：%s\n请求内容：%s", request_time, request_content);
+        // 将请求信息显示在 TextView 中
+        tv_request.setText(desc);
+        findViewById(R.id.btn_response).setOnClickListener(this);
+        TextView tv_response = findViewById(R.id.tv_response);
+        tv_response.setText("待返回的消息：" + mResponse);
+    }
+
+    @Override
+    public void onClick(View v) {
+        // 点击返回上一页，并携带数据
+        Intent intent = new Intent();
+        Bundle bundle = new Bundle();
+        // 将数据保存在bundle中
+        bundle.putString("response_time", System.currentTimeMillis() + "");
+        bundle.putString("response_content", mResponse);
+        intent.putExtras(bundle);
+        // 携带意图返回上一级页面
+        setResult(Activity.RESULT_OK, intent);
+        // 结束页面
+        finish();
+    }
+}
+```
+
+而响应的较为简单，想要返回的数据保存在bundle中即可。但如果要携带这些信息返回上一页，需要使用setResult指定返回的信号和意图。这个意图就能被上一个页面的register识别并取出数据。这里的`RESULT_OK`表示的是给上一页报出信息，说明当前调用页面是否执行成功。
+
+![image-20260318212253739](README_Picture/image-20260318212253739.png)
+
+### 2.3.7 为Activity添加补充信息
+
+一般来说，Android的字符串不会直接写在代码上，而是存储在其他文件中。
+
+#### 2.3.7.1 strings.xml
+
+一般的事先知道的字符串会保存在`res/values/strings.xml`中。
+
+```xml
+<resources>
+    <string name="app_name">chapter05</string>
+    <string name="say_hello">Hello World!</string>
+</resources>
+```
+
+上面的`strings.xml`中保存了两个字符串，第一个是当前的模块名，第二个是自定义的字符串。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ReadStringActivity"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_hello"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/say_hello"/>
+
+</LinearLayout>
+```
+
+这样，就成功读取了`strings.xml`里的字符串。
+
+或者在Activity中也能获取。
+
+```java
+TextView tv_hello = findViewById(R.id.tv_hello);
+String sayHello = getString(R.string.say_hello);
+tv_hello.setText(sayHello);
+```
+
+#### 2.3.7.2 元数据
+
+元数据写在了`AndroidManifest.xml`中。
+
+```xml
+<activity
+    android:name=".MetaDataActivity"
+    android:exported="true" >
+    <meta-data android:name="say_hello" android:value="Hello! World"/>
+</activity>
+```
+
+上面就是为了这个Activity写了一个meta-data。
+
+如果要获取这里的元数据，首先需要获取包管理器，通过包管理器获取当前活动的信息对象，通过信息对象能够获取这个活动携带的Bundle。通过这个Bundle就能获取其中的字符串。由此可以看出，这里的元数据是作为Bundle来进行存储的。
+
+```java
+package com.example.chapter05;
+
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MetaDataActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_meta_data);
+        TextView tv_meta = findViewById(R.id.tv_meta);
+        // 从AndroidManifest获取meta数据
+        // 1. 获取包管理器
+        PackageManager packageManager = getPackageManager();
+        try {
+            // 2. 获取当前活动的信息对象
+            ActivityInfo info = packageManager.getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+            // 3. 通过信息对象获取bundle
+            Bundle bundle = info.metaData;
+            // 4. 元数据保存在bundle中，可以直接获取
+            String hello = bundle.getString("say_hello");
+            tv_meta.setText(hello);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+```
+
+而这个元数据不仅能够传递字符串，还能传递页面。
+
+## 2.4 图形 Drawable
+
+前面学习的View、TextView等，都可属于前端页面。通过xml绘制页面，然后在Activity中展示页面。
+
+drawable的图片放在res下的drawable目录下。drawable目录下还有不同的drawable级别目录，如`drawable-ldpi`表示低分辨率的图片，`drawable-mdpi`表示中分辨率的图片，`drawable-hdpi`表示高分辨率的图片等。如果不同级别的目录存在同名图片，那么就会根据设备的分辨率来智能选择图片大小。因此如果适配不同大小的手机，需要将一张图片制作成不同级别的分辨率。
+
+### 2.4.1 形状图形Shape
+
+Shape用来描述常见的几何形状，如矩形、圆角矩形、圆形等。
+
+现在创建一个基础Shape，在`activity_drawable_shape.xml`中实现。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DrawableShapeActivity"
+    android:orientation="vertical">
+
+    <View
+        android:id="@+id/v_content"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_margin="10dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_rect"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="圆角矩形"/>
+
+        <Button
+            android:id="@+id/btn_oval"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="椭圆"/>
+
+    </LinearLayout>
+</LinearLayout>
+```
+
+这里展示了两个按钮普通按钮。
+
+然后，在drawable目录中创建`drawable resource file`文件，这里能够指定文件的名称以及标签名`root element`。
+
+![image-20260321223752456](README_Picture/image-20260321223752456.png)
+
+这样，就能定义圆角矩形的形状。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--    指定内部填充颜色-->
+    <solid android:color="#ffdd66"/>
+<!--    指定轮廓的粗细和颜色-->
+    <stroke android:width="1dp" android:color="#aaaaaa"/>
+<!--    指定四个圆角的半径-->
+    <corners android:radius="10dp"/>
+    
+</shape>
+```
+
+同样的，创建`shape_oval_rose.xml`，创建椭圆形状。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <solid android:color="#ff66aa"/>
+
+    <stroke android:width="1dp" android:color="#aaaaaa"/>
+
+</shape>
+```
+
+这样，就通过drawable自定义了两个图形。
+
+然后在Activity中，能够给按钮添加上功能。
+
+```java
+package com.example.chapter06;
+
+import android.os.Bundle;
+import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class DrawableShapeActivity extends AppCompatActivity implements View.OnClickListener{
+
+    private View v_content;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_drawable_shape);
+
+        v_content = findViewById(R.id.v_content);
+
+        findViewById(R.id.btn_rect).setOnClickListener(this);
+        findViewById(R.id.btn_oval).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        // 点击相应按钮，使得v_content的背景切换为对应的形状
+        if (v.getId() == R.id.btn_rect) {
+
+            v_content.setBackgroundResource(R.drawable.shape_rect_gold);
+
+        } else if (v.getId() == R.id.btn_oval) {
+
+            v_content.setBackgroundResource(R.drawable.shape_oval_rose);
+
+        }
+    }
+}
+```
+
+点击按钮后，通过`setBackgroundResource`来将指定的视图背景切换为定义好的drawable图形。
+
+在drawable的xml文件中，通过`android:shape="oval"`能够设置图片的基础图形。oval表示椭圆，rectangle表示矩形等。
+
+### 2.4.2 九宫格图片
+
+普通的图片如果尺寸太小，使用时过度放大，会导致系统拉伸图片导致变得模糊。
+
+而九宫格图片，或者是`.9`图片，在拉伸放大时只会对内容进行拉伸，而轮廓不变，这样能够保证图片整体的质量。
+
+**作用不大，暂时跳过。**
+
+### 2.4.3 状态列表图形
+
+按钮的背景正常情况下是突出的，按下后会变为凹陷。这种按下到弹起的过程，能够让用户得知按钮被点击。
+
+这种状态列表图形是`StateListDrawable`。
+
+接下来创建`btn_nine_selector.xml`。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" android:drawable="@drawable/shape_oval_rose"/>
+    <item android:drawable="@drawable/shape_rect_gold"/>
+</selector>
+```
+
+这里定义了selector的两种状态。第一种是`state_pressed`的状态，也就是定义按下时的状态，这里使用上面写的椭圆。而下面没有指定的drawable则是表示没有按下的状态，这里使用矩形形状。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DrawableStateActivity"
+    android:orientation="vertical"
+    android:padding="5dp"
+    android:gravity="center">
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="矩形按钮"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/btn_nine_selector"
+        android:text="定制的按钮"
+        android:padding="5dp"
+        android:layout_marginTop="5dp"/>
+
+</LinearLayout>
+```
+
+上面这里定制了两个按钮，一个是普通的按钮，另一个是使用了`state_pressed`状态的selector。
+
+第一个按钮点击后没有反应，但第二个按钮原本是圆角矩阵，但点击时就会变成椭圆。这种就是状态列表图形。
+
+而状态列表还有很多类型。如`state_pressed`说明是否按下，按下就会改变，`state_checked`用于确定是否勾选，可以用于复选框或者单选按钮。`state_focused`用于是否获取焦点，用户文本编辑框，`state_selected`用于确定是否选中。
+
+### 2.4.4 复选框
+
+复选框是用于勾选和取消勾选，可用于选择选项或者取消选择选项。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CheckBoxActivity"
+    android:orientation="vertical">
+
+    <CheckBox
+        android:id="@+id/ck_system"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:text="系统checkbox"/>
+        
+</LinearLayout>
+```
+
+这里就是实现了有一个复选框，能够用于勾选。
+
+![image-20260322225929027](assets/image-20260322225929027.png)
+
+
+
+而如果定义了状态列表图形，就能对这里的勾选框来进行定制。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:drawable="@drawable/shape_rect_gold"/>
+    <item  android:drawable="@drawable/shape_oval_rose"/>
+</selector>
+```
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CheckBoxActivity"
+    android:orientation="vertical">
+
+    <CheckBox
+        android:id="@+id/ck_system"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:button="@drawable/checkbox_selector"
+        android:text="系统checkbox"/>
+
+</LinearLayout>
+```
+
+在勾选和取消勾选的时候，就会选择展示矩形和椭圆。
+
+如果想要默认选中，可以设置`checked`属性为true。
+
+如果要修改复选框的文本，就要设置监听器。
+
+```java
+package com.example.chapter06;
+
+import android.os.Bundle;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class CheckBoxActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener{
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_check_box);
+        CheckBox ck_system = findViewById(R.id.ck_system);
+        ck_system.setOnCheckedChangeListener(this);
+    }
+
+    @Override
+    public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
+        String desc = String.format("系统是否开启：%s", isChecked ? "是" : "否");
+        buttonView.setText(desc);
+    }
+}
+```
+
+这里就能通过监听器来通过文本展示是否勾选了。
+
+### 2.4.5 开关按钮
+
+Switch是开关按钮，能够比复选框展示更多的界面元素。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SwitchDefaultActivity"
+    android:orientation="vertical">
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        
+        <TextView
+            android:id="@+id/ck_system"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:text="Switch开关"
+            android:layout_gravity="start"/>
+        
+        <Switch
+            android:id="@+id/sw_status"
+            android:layout_width="80dp"
+            android:layout_height="30dp"
+            android:padding="5dp"
+            android:layout_gravity="end"/>
+    </LinearLayout>
+    
+    <TextView
+        android:id="@+id/tv_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="start"/>
+
+</LinearLayout>
+```
+
+```java
+package com.example.chapter06;
+
+import android.os.Bundle;
+import android.widget.CompoundButton;
+import android.widget.Switch;
+import android.widget.TextView;
+
+import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+public class SwitchDefaultActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener{
+
+    private TextView tv_result;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_switch_default);
+        Switch sw_status = findViewById(R.id.sw_status);
+        // 要求：当Switch开关状态改变时， TextView显示当前开关状态
+        tv_result = findViewById(R.id.tv_result);
+        sw_status.setOnCheckedChangeListener(this);
+        
+    }
+
+    @Override
+    public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
+        String desc = String.format("Switch开关状态：%s", isChecked ? "开启" : "关闭");
+        tv_result.setText(desc);
+    }
+}
+```
+
+在这里能够看到，开关被点击时，TextView的文本能够修改。
+
+![image-20260322232633067](assets/image-20260322232633067.png)
+
+这里的开关元素能够使用StateListDrawable来进行设置。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:drawable="@drawable/shape_rect_gold"/>
+    <item  android:drawable="@drawable/shape_oval_rose"/>
+</selector>
+```
+
+然后将Checkbox的background设置为这个drawable即可。
+
+由此能够发现，状态列表图形的使用是一成不变的。
